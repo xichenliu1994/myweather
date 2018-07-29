@@ -2,6 +2,7 @@ package com.xichenliu.myweather;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,11 +53,6 @@ public class ChooseAreaFragment extends Fragment {
     private List<City> cityList;
 
     /**
-     * 县列表
-     */
-    private List<County> countyList;
-
-    /**
      * 选中的省份
      */
     private Province selectedProvince;
@@ -72,7 +68,7 @@ public class ChooseAreaFragment extends Fragment {
     private int currentLevel;
 
     @Override
-    public View onCreateView(LayoutInflater inflater,ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.choose_area,container,false);
         titleText=(TextView) view.findViewById(R.id.title_text);
@@ -120,7 +116,7 @@ public class ChooseAreaFragment extends Fragment {
         provinceList= DataSupport.findAll(Province.class);
         if (provinceList.size()>0){
             dataList.clear();
-            for (Province province:provinceList){
+            for (Province province : provinceList){
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
@@ -149,7 +145,7 @@ public class ChooseAreaFragment extends Fragment {
             currentLevel=LEVEL_CITY;
         }else {
             int provinceCode=selectedProvince.getProvinceCode();
-            String address="http://guolin.tech/api/china"+provinceCode;
+            String address="http://guolin.tech/api/china/"+provinceCode;
             queryFromServer(address,"city");
         }
     }
@@ -160,7 +156,10 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCounties() {
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList=DataSupport.where("cityid = ?",String.valueOf(selectedCity.getId())).find(County.class);
+        /*
+      县列表
+     */
+        List<County> countyList = DataSupport.where("cityid = ?", String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size()>0){
             dataList.clear();
             for (County county:countyList){
@@ -172,7 +171,7 @@ public class ChooseAreaFragment extends Fragment {
         }else {
             int provinceCode=selectedProvince.getProvinceCode();
             int cityCode=selectedCity.getCityCode();
-            String address="http://guolin.tech/api/china"+provinceCode+"/"+cityCode;
+            String address="http://guolin.tech/api/china/"+provinceCode+"/"+cityCode;
             queryFromServer(address,"county");
         }
     }
@@ -188,7 +187,7 @@ public class ChooseAreaFragment extends Fragment {
                 String responseText=response.body().string();
                 boolean result=false;
                 if ("province".equals(type)){
-                    result= Utility.handleProviinceResponse(responseText);
+                    result= Utility.handleProvinceResponse(responseText);
                 }else if ("city".equals(type)){
                     result=Utility.handleCityResponse(responseText,selectedProvince.getId());
                 }else if ("county".equals(type)){
